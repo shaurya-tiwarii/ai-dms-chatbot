@@ -13,7 +13,7 @@ def extract(file):
         reader=PdfReader(file); return "\n".join((p.extract_text() or "") for p in reader.pages)
     if name.endswith(".docx"):
         doc=Document(file); return "\n".join(p.text for p in doc.paragraphs)
-    raise ValueError("Supported files: TXT, PDF, DOCX")
+    raise ValueError("Supported files: TXT, PDF, DOCX only")
 
 @app.route("/")
 def index(): return render_template("index.html")
