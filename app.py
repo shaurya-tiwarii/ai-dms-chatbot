@@ -9,10 +9,11 @@ app=Flask(__name__); app.secret_key=os.getenv("SECRET_KEY","dms-dev")
 def extract(file):
     name=file.filename.lower()
     if name.endswith(".txt"): return file.read().decode("utf-8","ignore")
-    # pdf support
     if name.endswith(".pdf"):
         reader=PdfReader(file); return "\n".join((p.extract_text() or "") for p in reader.pages)
-    raise ValueError("unsupported file type")
+    if name.endswith(".docx"):
+        doc=Document(file); return "\n".join(p.text for p in doc.paragraphs)
+    raise ValueError("Supported files: TXT, PDF, DOCX")
 
 @app.route("/")
 def index(): return render_template("index.html")
