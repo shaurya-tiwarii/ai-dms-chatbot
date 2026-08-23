@@ -45,7 +45,7 @@ def upload():
 @app.post("/chat")
 def chat():
     doc=session.get("doc","")
-    if not doc:return jsonify(error="Upload a document first."),400
+    if not doc:return jsonify(error="Please upload a document first."),400
     q=request.json.get("question","").strip()
     answer=ask(doc,q)
     return jsonify(answer=answer)
