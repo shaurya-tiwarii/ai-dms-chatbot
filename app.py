@@ -17,13 +17,16 @@ def extract(file):
         doc=Document(file); return "\n".join(p.text for p in doc.paragraphs)
     raise ValueError("Supported files: TXT, PDF, DOCX")
 
-def ask(document, question):
+def ask(document, history, question):
     prompt=f"""You are a document management assistant.
 Answer ONLY using the supplied document. If the document does not contain the answer,
 say that the information is not present in the document. Do not invent facts.
 
 DOCUMENT:
 {document[:120000]}
+
+CONVERSATION:
+{history}
 
 USER QUESTION:
 {question}
@@ -38,7 +41,7 @@ def index(): return render_template("index.html")
 def upload():
     try:
         text=extract(request.files["document"])
-        session["doc"]=text
+        session["doc"]=text; session["history"]=[]
         return jsonify(ok=True,preview=text[:1000])
     except Exception as e:return jsonify(ok=False,error=str(e)),400
 
@@ -47,7 +50,10 @@ def chat():
     doc=session.get("doc","")
     if not doc:return jsonify(error="Upload a document first."),400
     q=request.json.get("question","").strip()
-    answer=ask(doc,q)
+    history=session.get("history",[])
+    answer=ask(doc,history,q)
+    history += [{"role":"user","text":q},{"role":"assistant","text":answer}]
+    session["history"]=history[-10:]
     return jsonify(answer=answer)
 
 if __name__=="__main__":
