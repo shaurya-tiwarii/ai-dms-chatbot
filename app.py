@@ -53,7 +53,7 @@ def chat():
     history=session.get("history",[])
     answer=ask(doc,history,q)
     history += [{"role":"user","text":q},{"role":"assistant","text":answer}]
-    session["history"]=history[-10:]
+    session["history"]=history[-10:]  # only keep last 10
     return jsonify(answer=answer)
 
 if __name__=="__main__":
