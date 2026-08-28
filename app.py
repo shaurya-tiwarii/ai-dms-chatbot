@@ -5,7 +5,7 @@ from docx import Document
 import google.generativeai as genai
 
 app=Flask(__name__); app.secret_key=os.getenv("SECRET_KEY","dms-dev")
-DOCS={}  # token -> extracted document text (in-memory, per session)
+DOCS={}  # token -> doc text, kept in memory
 genai.configure(api_key=os.getenv("GEMINI_API_KEY",""))
 MODEL="gemini-2.5-flash"
 
