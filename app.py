@@ -5,7 +5,7 @@ from docx import Document
 import google.generativeai as genai
 
 app=Flask(__name__); app.secret_key=os.getenv("SECRET_KEY","dms-dev")
-DOCS={}  # token -> doc text, kept in memory
+DOCS={}  # token -> extracted document text (in-memory, per session)
 genai.configure(api_key=os.getenv("GEMINI_API_KEY",""))
 MODEL="gemini-2.5-flash"
 
@@ -41,7 +41,7 @@ def index(): return render_template("index.html")
 @app.post("/upload")
 def upload():
     try:
-        text=extract(request.files["document"])
+        text=extract(request.files["document"])[:200000]
         token=os.urandom(16).hex(); DOCS[token]=text
         session["doc_token"]=token; session["history"]=[]
         return jsonify(ok=True,preview=text[:1000])
