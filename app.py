@@ -5,6 +5,7 @@ from docx import Document
 import google.generativeai as genai
 
 app=Flask(__name__); app.secret_key=os.getenv("SECRET_KEY","dms-dev")
+DOCS={}  # token -> extracted document text (in-memory, per session)
 genai.configure(api_key=os.getenv("GEMINI_API_KEY",""))
 MODEL="gemini-2.5-flash"
 
@@ -41,19 +42,20 @@ def index(): return render_template("index.html")
 def upload():
     try:
         text=extract(request.files["document"])
-        session["doc"]=text; session["history"]=[]
+        token=os.urandom(16).hex(); DOCS[token]=text
+        session["doc_token"]=token; session["history"]=[]
         return jsonify(ok=True,preview=text[:1000])
     except Exception as e:return jsonify(ok=False,error=str(e)),400
 
 @app.post("/chat")
 def chat():
-    doc=session.get("doc","")
+    doc=DOCS.get(session.get("doc_token",""))
     if not doc:return jsonify(error="Upload a document first."),400
     q=request.json.get("question","").strip()
     history=session.get("history",[])
     answer=ask(doc,history,q)
     history += [{"role":"user","text":q},{"role":"assistant","text":answer}]
-    session["history"]=history[-10:]  # only keep last 10
+    session["history"]=history[-10:]
     return jsonify(answer=answer)
 
 if __name__=="__main__":
