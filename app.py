@@ -41,7 +41,6 @@ def index(): return render_template("index.html")
 @app.post("/upload")
 def upload():
     try:
-    # cap extracted text
         text=extract(request.files["document"])[:200000]
         token=os.urandom(16).hex(); DOCS[token]=text
         session["doc_token"]=token; session["history"]=[]
